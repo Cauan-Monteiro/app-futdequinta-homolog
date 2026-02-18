@@ -8,7 +8,6 @@ const API_URL = import.meta.env.VITE_API_URL
 const PASS = import.meta.env.VITE_ADMIN_PASSWORD
 const TITLE = import.meta.env.VITE_TITULO_MAIN
 
-
 // Interface para definir a estrutura dos dados de um jogador
 interface Jogador {
   id: number
@@ -352,7 +351,6 @@ function App() {
   const reloadPage = () => {
     window.location.reload();
   };
-
   const warningPage = () => {
     window.alert("Esta página ainda está em desenvolvimento! Por favor, volte mais tarde.")
   }
@@ -447,7 +445,7 @@ function App() {
                       </label>
                       <input
                         type="number"
-                        value={golsTime1}
+                        placeholder={golsTime1.toString()}
                         onChange={(e) => {
                           const valor = parseInt(e.target.value) || 0
                           setGolsTime1(valor < 0 ? 0 : valor)
@@ -509,7 +507,7 @@ function App() {
                       </label>
                       <input
                         type="number"
-                        value={golsTime2}
+                        placeholder={golsTime2.toString()}
                         onChange={(e) => {
                           const valor = parseInt(e.target.value) || 0
                           setGolsTime2(valor < 0 ? 0 : valor)
