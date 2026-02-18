@@ -46,7 +46,12 @@ export default function Ranking({
         return ((jogador.vitorias / jogador.partidas)*100).toFixed(2);
     }
     const scoreJogador = (jogador: Jogador) => {
-        return (((jogador.vitorias * 3) + (jogador.empates))/(jogador.vitorias + jogador.empates + jogador.derrotas))*100;
+        if(jogador.partidas === 0){ 
+            return 0.00.toFixed(2);
+        }else if(jogador.partidas <= 2) {
+            return 50.00.toFixed(2);
+        }else{
+            return (((jogador.vitorias * 3) + (jogador.empates))/(jogador.vitorias + jogador.empates + jogador.derrotas)*100).toFixed(2);}
     }
 
     return (
