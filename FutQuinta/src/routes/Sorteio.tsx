@@ -35,8 +35,8 @@ export default function Sorteio({ jogadores }: SorteioProps) {
     }
 
     const realizarSorteio = () => {
-        if (sortJogadores.length < 10) {
-            alert("Selecione pelo menos 10 jogadores para realizar o sorteio.");
+        if (sortJogadores.length < 8) {
+            alert("Selecione pelo menos 8 jogadores de linha para realizar o sorteio.");
             return;
         } 
         const jogadoresOrdenados = [...sortJogadores].sort((a, b) => {
