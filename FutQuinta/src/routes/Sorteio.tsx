@@ -17,6 +17,7 @@ interface SorteioProps {
 }
 
 export default function Sorteio({ jogadores }: SorteioProps) {
+
     const [sortJogadores, setSortJogadores] = useState<Jogador[]>([]);
     const [sortGoleiros, setSortGoleiros] = useState<Jogador[]>([]);
 
@@ -38,23 +39,19 @@ export default function Sorteio({ jogadores }: SorteioProps) {
     }
 
     const realizarSorteio = () => {
-        const listaGoleiros = sortGoleiros.filter(jogador => jogador.posicao === "Goleiro");
-
-        const listaLinha = sortJogadores.filter(jogador => jogador.posicao === "Linha");
-
-        if (listaGoleiros.length < 2) {
+        if (sortGoleiros.length < 2) {
             alert("Selecione pelo menos 2 goleiros para realizar o sorteio.");
             return;
         }
-        if (listaLinha.length < 8) {
+        if (sortJogadores.length < 8) {
             alert("Selecione pelo menos 8 jogadores de linha para realizar o sorteio.");
             return;
         } 
 
-        const jogadoresOrdenados = [...listaLinha].sort((a, b) => {
+        const jogadoresOrdenados = [...sortJogadores].sort((a, b) => {
             return parseFloat(scoreJogador(b)) - parseFloat(scoreJogador(a));
         });
-        const goleirosOrdenados = [...listaGoleiros].sort((a, b) => {
+        const goleirosOrdenados = [...sortGoleiros].sort((a, b) => {
             return parseFloat(scoreJogador(b)) - parseFloat(scoreJogador(a));
         });
         
@@ -108,7 +105,7 @@ export default function Sorteio({ jogadores }: SorteioProps) {
                 
                 {/* Lista de seleção */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 max-h-96 overflow-y-auto pr-2">
-                    {jogadores.map(jogador => {
+                    {(jogadores.filter(j => j.posicao === "Goleiro")).map(jogador => {
                         // Verifica se o jogador já está no array sortGoleiros
                         const estaPresente = sortGoleiros.some(j => j.id === jogador.id);
                         
@@ -140,7 +137,7 @@ export default function Sorteio({ jogadores }: SorteioProps) {
                 
                 {/* Lista de seleção */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 max-h-96 overflow-y-auto pr-2">
-                    {jogadores.map(jogador => {
+                    {(jogadores.filter(j => j.posicao === "Linha")).map(jogador => {
                         // Verifica se o jogador já está no array sortJogadores
                         const estaPresente = sortJogadores.some(j => j.id === jogador.id);
                         
