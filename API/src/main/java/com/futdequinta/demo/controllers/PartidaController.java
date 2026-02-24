@@ -28,4 +28,16 @@ public class PartidaController {
         partida.setData(LocalDateTime.now());
         return repo.save(partida);
     }
+
+    @PutMapping("/{id}")
+    public Partida atualizar(@PathVariable Long id, @RequestBody Partida atualizado) {
+        return repo.findById(id)
+                .map(p -> {
+                    p.setGolsAzul(atualizado.getGolsAzul());
+                    p.setGolsVermelho(atualizado.getGolsVermelho());
+                    p.setVencedor(atualizado.getVencedor());
+                    return repo.save(p);
+                })
+                .orElseThrow(() -> new RuntimeException("Partida não encontrada"));
+    }
 }

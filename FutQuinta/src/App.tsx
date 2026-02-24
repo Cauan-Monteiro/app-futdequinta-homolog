@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import {Routes, Route, Link } from 'react-router-dom'
 import Ranking from './routes/Ranking'
 import Sorteio from './routes/Sorteio'
+import Login from './routes/Login'
 import './App.css'
 import logo from './assets/newLogo.png'
 
@@ -360,7 +361,6 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-900">
-      {/* NAVBAR: DADOS VARIÁVEIS - Espaço para ícone e nome centralizado */}
       <nav className="bg-gray-800 border-b border-gray-700 py-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-8 justify-center items-center">
@@ -370,8 +370,11 @@ function App() {
               <h1 className="text-4xl font-thin text-white">{TITLE}</h1>
             </div>
             <div className="flex flex-row gap-12 w-full h-full justify-center">
-              <Link to="/" className="text-gray-300 hover:text-white transition-colors" >
+              <Link to="/home" className="text-gray-300 hover:text-white transition-colors" >
                 Home
+              </Link>
+              <Link to="/" className="text-gray-300 hover:text-white transition-colors" >
+                Login
               </Link>
               <Link to="/ranking" className="text-gray-300 hover:text-white transition-colors" >
                 Ranking
@@ -388,7 +391,7 @@ function App() {
       {/* CONTEÚDO PRINCIPAL */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Routes>
-          <Route path="/" element={
+          <Route path="/home" element={
             <>
               {/* SEÇÃO DE INPUTS PARA DOIS TIMES */}
               <div className="mb-8">
@@ -637,6 +640,11 @@ function App() {
             <Sorteio 
               jogadores={jogadores}
             />
+          
+          } />
+
+          <Route path="/" element={
+            <Login />
           } />
         </Routes>
       </div>
