@@ -3,7 +3,6 @@ import '../App.css'
 
 // const API_URL = import.meta.env.VITE_API_URL
 
-
 interface Jogador {
     id: number;
     nome: string;
@@ -21,6 +20,7 @@ interface SorteioProps {
 
 export default function Sorteio({ jogadores }: SorteioProps) {
 
+    
     // const isAvaible = useState(
     //     () => {
     //         const dataAtual = new Date().toString().split(" ");
@@ -34,7 +34,6 @@ export default function Sorteio({ jogadores }: SorteioProps) {
 
     const [sortJogadores, setSortJogadores] = useState<Jogador[]>([]);
     const [sortGoleiros, setSortGoleiros] = useState<Jogador[]>([]);
-
 
     const [timeAzul, setTimeAzul] = useState<Jogador[]>([]);
     const [timeVermelho, setTimeVermelho] = useState<Jogador[]>([]);
@@ -137,7 +136,7 @@ export default function Sorteio({ jogadores }: SorteioProps) {
     return (
         <div className="max-w-4xl mx-auto px-4 py-8">
             <h2 className="text-3xl font-bold text-white mb-6">Sorteador de Times</h2>
-
+            
             <div className="bg-gray-800 rounded-lg p-6 mb-8">
                 <h3 className="text-xl font-bold text-blue-400 mb-4">
                     Goleiros Presentes ({sortGoleiros.length})
@@ -169,6 +168,7 @@ export default function Sorteio({ jogadores }: SorteioProps) {
                     })}
                 </div>
             </div>
+
             
             <div className="bg-gray-800 rounded-lg p-6 mb-8">
                 <h3 className="text-xl font-bold text-blue-400 mb-4">

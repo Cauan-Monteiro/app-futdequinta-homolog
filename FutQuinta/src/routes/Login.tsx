@@ -1,22 +1,37 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import iconeVisivel from '../assets/pass-visible.png';
+import iconeInvisivel from '../assets/pass-invisible.png';
+import Cookies from 'js-cookie';
 import '../App.css';
+
+const API_URL = import.meta.env.VITE_API_URL;
+
 
 // filepath: c:/Users/cauan-monteiro/OneDrive - PUCRS - BR/FutDeQuinta - Homolog/FutQuinta/src/routes/Login.tsx
 
 interface LoginFormData {
     email: string;
-    password: string;
+    senha: string;
 }
 
 export default function Login() {
+    const navigate = useNavigate();
+
     const [formData, setFormData] = useState<LoginFormData>({
         email: '',
-        password: '',
+        senha: '',
     });
 
     const [loading, setLoading] = useState(false);
-    const [showPassword, setShowPassword] = useState(false);
+    const [showSenha, setShowSenha] = useState(false);
+
+    useEffect(() => {
+        const token = Cookies.get('token_acesso');
+        if (token) {
+            navigate('/home', {replace: true});
+        }
+    }, [navigate]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -31,9 +46,20 @@ export default function Login() {
         setLoading(true);
 
         try {
-            // Implementar lógica de autenticação aqui
-            console.log('Login attempt:', formData);
-            alert('Funcionalidade de login em desenvolvimento!');
+            const res = await fetch(`${API_URL}/usuarios/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData),
+            });
+
+            if(res.ok) {
+                const data = await res.json();
+                Cookies.set('token_acesso', data.id, { expires: 7 }); // Expira em 7 dias
+                navigate('/home', {replace: true});
+            } else {
+                const errorData = await res.text();
+                alert(errorData);
+            }
         } catch (err) {
             console.error(err);
             alert('Erro ao fazer login!');
@@ -80,10 +106,10 @@ export default function Login() {
                             </label>
                             <div className="relative">
                                 <input
-                                    type={showPassword ? 'text' : 'password'}
+                                    type={showSenha ? 'text' : 'password'}
                                     id="password"
-                                    name="password"
-                                    value={formData.password}
+                                    name="senha"
+                                    value={formData.senha}
                                     onChange={handleChange}
                                     placeholder="••••••••"
                                     required
@@ -91,10 +117,10 @@ export default function Login() {
                                 />
                                 <button
                                     type="button"
-                                    onClick={() => setShowPassword(!showPassword)}
+                                    onClick={() => setShowSenha(!showSenha)}
                                     className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-300 transition-colors"
                                 >
-                                    {showPassword ? '🙈' : '👁️'}
+                                    {showSenha ? <img src={iconeVisivel} alt="Mostrar senha" className="h-5 w-5" /> : <img src={iconeInvisivel} alt="Ocultar senha" className="h-5 w-5" />}
                                 </button>
                             </div>
                         </div>

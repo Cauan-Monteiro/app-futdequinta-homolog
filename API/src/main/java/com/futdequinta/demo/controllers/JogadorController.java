@@ -2,13 +2,13 @@ package com.futdequinta.demo.controllers;
 
 import com.futdequinta.demo.entities.Jogador;
 import com.futdequinta.demo.repositories.JogadorRepository;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/jogadores")
-@CrossOrigin(origins = "http://localhost:5173")
 public class JogadorController {
 
     private final JogadorRepository repo;
@@ -19,7 +19,7 @@ public class JogadorController {
 
     @GetMapping
     public List<Jogador> listar() {
-        return repo.findAll();
+        return repo.findAll(Sort.by("pontos").descending().and(Sort.by("derrotas").ascending().and(Sort.by("vitorias").descending())));
     }
 
     @PutMapping("/{id}")
