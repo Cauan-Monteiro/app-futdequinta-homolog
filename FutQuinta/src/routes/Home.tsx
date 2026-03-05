@@ -1,4 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
+import Cookies from 'js-cookie';
 import { AuthContext } from '../components/AuthContext';
 
 
@@ -47,7 +48,12 @@ export default function Home({ jogadores, carregarJogadores }: HomeProps) {
   useEffect(() => {
     async function carregarPartidas() {
       try {
-        const res = await fetch(`${API_URL}/partidas`);
+        const res = await fetch(`${API_URL}/partidas`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json',
+            'Authorization': `Bearer ${Cookies.get('token_acesso')}`
+           }
+        });
         if (!res.ok) throw new Error('Erro ao buscar partidas');
         const data = await res.json();
         setPartidasSalvas(data);
