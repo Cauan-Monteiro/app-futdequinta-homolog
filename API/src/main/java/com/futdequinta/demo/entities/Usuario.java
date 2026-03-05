@@ -3,6 +3,7 @@ package com.futdequinta.demo.entities;
 import com.futdequinta.demo.enums.RoleUsuario;
 import jakarta.persistence.*;
 
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -19,6 +20,9 @@ public class Usuario {
     @OneToOne
     @JoinColumn(name = "jogador_id")
     private Jogador jogador;
+
+    @OneToMany(mappedBy = "usuario")
+    private List<Membership> memberships;
 
     public Usuario() {}
 
@@ -70,6 +74,10 @@ public class Usuario {
 
     public void setIdJogador(Jogador idJogador) {
         this.jogador = idJogador;
+    }
+
+    public List<Membership> getMemberships() {
+        return memberships;
     }
 
     @Override

@@ -53,8 +53,8 @@ export default function Login() {
             });
 
             if(res.ok) {
-                const data = await res.json();
-                Cookies.set('token_acesso', data.id, { expires: 7 }); // Expira em 7 dias
+                const token = await res.text();
+                Cookies.set('token_acesso', token)
                 navigate('/home', {replace: true});
             } else {
                 const errorData = await res.text();

@@ -3,6 +3,8 @@ package com.futdequinta.demo.controllers;
 import com.futdequinta.demo.entities.Jogador;
 import com.futdequinta.demo.entities.Usuario;
 import com.futdequinta.demo.repositories.UsuarioRepository;
+import com.futdequinta.demo.security.TokenService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,6 +14,9 @@ import java.util.List;
 @RequestMapping("/api/usuarios")
 public class UsuarioController {
     private UsuarioRepository repo;
+
+    @Autowired
+    TokenService tokenService;
 
     public UsuarioController(UsuarioRepository usuarioRepository) {
         this.repo = usuarioRepository;
@@ -51,6 +56,9 @@ public class UsuarioController {
             return ResponseEntity.status(401).body("Login Invalido");
         }
 
-        return ResponseEntity.status(200).body(usuarioEncontrado);
+        String token = tokenService.gerarToken(usuarioEncontrado);
+
+
+        return ResponseEntity.status(200).body(token);
     }
 }

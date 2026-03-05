@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
+import { AuthContext } from '../components/AuthContext';
+
 
 const API_URL = import.meta.env.VITE_API_URL;
 const PASS = import.meta.env.VITE_ADMIN_PASSWORD;
@@ -38,6 +40,10 @@ export default function Home({ jogadores, carregarJogadores }: HomeProps) {
   const [golsTime2, setGolsTime2] = useState<number>(0);
   const [partidasSalvas, setPartidasSalvas] = useState<PartidaSalva[]>([]);
 
+  const { equipeAtiva } = useContext(AuthContext);
+
+
+
   useEffect(() => {
     async function carregarPartidas() {
       try {
@@ -50,7 +56,10 @@ export default function Home({ jogadores, carregarJogadores }: HomeProps) {
       }
     }
     carregarPartidas();
+
   }, []);
+
+
 
   // Ordena as partidas por data
   const partidasOrdenadas = [...partidasSalvas].sort((a, b) => {
@@ -316,7 +325,7 @@ export default function Home({ jogadores, carregarJogadores }: HomeProps) {
         <div className="flex justify-center">
           <button
             onClick={salvarPartida}
-            disabled={carregando}
+            disabled={carregando || equipeAtiva?.role !== 'ADMIN'}
             className="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-8 rounded-lg transition-colors cursor-pointer"
           >
             {carregando ? 'Salvando...' : 'Salvar Partida'}
