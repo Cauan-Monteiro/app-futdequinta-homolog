@@ -1,4 +1,7 @@
 package com.futdequinta.demo.security;
+import com.auth0.jwt.JWTVerifier;
+import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.futdequinta.demo.entities.Membership;
 import com.futdequinta.demo.entities.Usuario;
 import com.auth0.jwt.JWT;
@@ -37,6 +40,22 @@ public class TokenService {
 
         } catch (JWTCreationException exception) {
             throw new RuntimeException("Erro ao gerar token jwt", exception);
+        }
+    }
+
+    public String validateToken(String token) {
+        try {
+            Algorithm algorithm = Algorithm.HMAC256(secret);
+
+            return JWT.require(algorithm)
+                    .withIssuer("futdequinta")
+                    .build()
+                    .verify(token)
+                    .getSubject();
+
+        } catch (JWTVerificationException exception){
+            // Invalid signature/claims or other validation errors
+            return "";
         }
     }
 }
