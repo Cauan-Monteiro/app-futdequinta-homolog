@@ -8,6 +8,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/company")
+@CrossOrigin(origins = "http://localhost")
 public class CompanyController {
     private CompanyRepository repo;
 
@@ -18,6 +19,11 @@ public class CompanyController {
     @GetMapping
     public List<Company> listar() {
         return repo.findAll();
+    }
+
+    @GetMapping("/{id}")
+    public Company buscar(@PathVariable Long id) {
+        return repo.getById(id);
     }
 
     @PostMapping

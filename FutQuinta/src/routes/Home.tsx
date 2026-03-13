@@ -1,6 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
 import Cookies from 'js-cookie';
 import { AuthContext } from '../components/AuthContext';
+import CartaJogador from '../components/CartaJogador';
 
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -11,11 +12,13 @@ export interface Jogador {
   id: number;
   nome: string;
   posicao: "Goleiro" | "Linha";
+  fisico: number
   pontos: number;
   partidas: number;
   vitorias: number;
   empates: number;
   derrotas: number;
+  fotoUrl: string | null;
 }
 
 interface PartidaSalva {
@@ -44,7 +47,6 @@ export default function Home({ jogadores, carregarJogadores }: HomeProps) {
   const { equipeAtiva } = useContext(AuthContext);
 
 
-
   useEffect(() => {
     async function carregarPartidas() {
       try {
@@ -61,6 +63,7 @@ export default function Home({ jogadores, carregarJogadores }: HomeProps) {
         console.error(err);
       }
     }
+    carregarJogadores();
     carregarPartidas();
 
   }, []);
@@ -164,7 +167,9 @@ export default function Home({ jogadores, carregarJogadores }: HomeProps) {
 
       const res = await fetch(`${API_URL}/partidas`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json',
+          'Authorization': `Bearer ${Cookies.get('token_acesso')}`
+         },
         body: JSON.stringify(dadosPartida),
       });
 
@@ -201,8 +206,27 @@ export default function Home({ jogadores, carregarJogadores }: HomeProps) {
     }
   };
 
+
+  //Cards
+  const [ jogadorDestaque, setJogadorDestaque ] = useState<number>(0);
+  const jogadorEncontrado = jogadores.find(jogador => jogador.id === jogadorDestaque);
+
+  const scoreJogador = (jogador: Jogador) => {
+    if (jogador.partidas === 0) {
+        return 0.00.toFixed(2);
+    } else if (jogador.partidas <= 2) {
+        return 50.00.toFixed(2);
+    } else {
+        const pontosPossiveis = jogador.partidas * 3;
+        
+        //Dividimos um pelo outro e multiplicamos por 100
+        return ((jogador.pontos / pontosPossiveis) * 100).toFixed(2);
+    }
+  }
+
   return (
     <>
+      {equipeAtiva?.role === 'ADMIN' && (
       <div className="mb-8">
         <h2 className="text-3xl font-bold text-white mb-6">Registrar Partida</h2>
 
@@ -338,6 +362,7 @@ export default function Home({ jogadores, carregarJogadores }: HomeProps) {
           </button>
         </div>
       </div>
+      )}
 
       {/* SEÇÃO DE PARTIDAS SALVAS */}
       {partidasOrdenadas.length > 0 && (
@@ -413,6 +438,30 @@ export default function Home({ jogadores, carregarJogadores }: HomeProps) {
           </div>
         </div>
       )}
+
+      <div className="mb-8 bg-gray-800 rounded-lg shadow-lg p-6 flex flex-col items-center">
+        <h2 className="text-3xl font-bold text-white mb-6">Visualizar BID</h2>
+        
+        <select
+          value={jogadorDestaque}
+          onChange={(e) => setJogadorDestaque(parseInt(e.target.value))}
+          className="w-full max-w-md px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-green-500 mb-8"
+        >
+          <option value={0}>Selecione um jogador para ver a carta</option>
+          {jogadores.map((jogador) => (
+            <option key={jogador.id} value={jogador.id}>{jogador.nome}</option>
+          ))}
+        </select>
+
+        {jogadorEncontrado && (
+          <div className="transform scale-90 sm:scale-100 transition-all">
+            <CartaJogador
+              jogador={jogadorEncontrado}
+              notaGeral={parseInt(scoreJogador(jogadorEncontrado))}
+            />
+          </div>
+        )}
+      </div>
 
       {/* MODAL DE EDIÇÃO DE TIME */}
       {timeEditandoModal && (

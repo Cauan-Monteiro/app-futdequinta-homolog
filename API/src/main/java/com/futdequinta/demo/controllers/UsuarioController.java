@@ -1,6 +1,6 @@
 package com.futdequinta.demo.controllers;
 
-import com.futdequinta.demo.entities.Jogador;
+
 import com.futdequinta.demo.entities.Usuario;
 import com.futdequinta.demo.repositories.UsuarioRepository;
 import com.futdequinta.demo.security.TokenService;
@@ -12,6 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/usuarios")
+@CrossOrigin(origins = "http://localhost")
 public class UsuarioController {
     private UsuarioRepository repo;
 

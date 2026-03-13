@@ -1,9 +1,15 @@
 package com.futdequinta.demo.entities;
 
-import com.futdequinta.demo.enums.Posicao;
-import jakarta.persistence.*;
-
 import java.util.Objects;
+
+import com.futdequinta.demo.enums.Posicao;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 
 @Entity
 public class Jogador {
@@ -17,22 +23,26 @@ public class Jogador {
 
     @Enumerated(EnumType.STRING)
     private Posicao posicao;
+    private Integer fisico;
     private Integer partidas;
     private Integer vitorias;
     private Integer empates;
     private Integer derrotas;
+    private String fotoUrl;
 
     public Jogador() {}
 
-    public Jogador(Long id, String nome, Integer pontos,Posicao posicao, Integer partidas, Integer vitorias, Integer empates, Integer derrotas) {
+    public Jogador(Long id, String nome, Integer pontos,Posicao posicao, Integer fisico, Integer partidas, Integer vitorias, Integer empates, Integer derrotas, String fotoUrl) {
         this.id = id;
         this.nome = nome;
         this.pontos = pontos;
         this.posicao = posicao;
+        this.fisico = fisico;
         this.partidas = partidas;
         this.vitorias = vitorias;
         this.empates = empates;
         this.derrotas = derrotas;
+        this.fotoUrl = fotoUrl;
     }
 
     public Long getId() {
@@ -58,6 +68,10 @@ public class Jogador {
     public Posicao getPosicao() {return posicao;}
 
     public void setPosicao(Posicao posicao) {this.posicao = posicao;}
+
+    public Integer getFisico() {return fisico;}
+
+    public void setFisico(Integer fisico) {this.fisico = fisico;}
 
     public Integer getPartidas() {
         return partidas;
@@ -91,6 +105,14 @@ public class Jogador {
         this.derrotas = derrotas;
     }
 
+    public String getFotoUrl() {
+        return fotoUrl;
+    }
+
+    public void setFotoUrl(String fotoUrl) {
+        this.fotoUrl = fotoUrl;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
@@ -109,7 +131,8 @@ public class Jogador {
                 "id=" + id +
                 ", nome='" + nome + '\'' +
                 ", pontos=" + pontos +
-                ", posição=" + posicao +
+                ", posicao=" + posicao +
+                ", fisico=" + fisico +
                 ", partidas=" + partidas +
                 ", vitorias=" + vitorias +
                 ", empates=" + empates +

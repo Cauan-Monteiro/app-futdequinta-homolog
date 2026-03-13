@@ -20,7 +20,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const token = Cookies.get('token_acesso');
     if (token) {
       const tokenData = jwtDecode<{ permissoes: Record<string, string> }>(token);
-      const primeiroId = Object.keys(tokenData.permissoes)[0];
+      const primeiroId = Object.keys(tokenData.permissoes)[0]; // Pega o primeiro ID do token (pode ser ajustado conforme a estrutura do token)
       if (primeiroId) {
         setEquipeAtiva({ id: primeiroId, role: tokenData.permissoes[primeiroId] });
         setPermissoesGlobais(tokenData.permissoes);

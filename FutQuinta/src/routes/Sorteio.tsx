@@ -12,6 +12,7 @@ interface Jogador {
     vitorias: number;
     empates: number;
     derrotas: number;
+    fotoUrl: string | null;
 }
 
 interface SorteioProps {

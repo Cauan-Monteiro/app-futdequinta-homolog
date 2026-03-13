@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Routes, Route } from 'react-router-dom'
+import Cookies from 'js-cookie'
 
 // Importando as Telas
 import Login from './routes/Login'
@@ -19,11 +20,13 @@ export interface Jogador {
   id: number
   nome: string
   posicao: "Goleiro" | "Linha"
+  fisico: number
   pontos: number
   partidas: number
   vitorias: number
   empates: number
   derrotas: number
+  fotoUrl: string | null;
 }
 
 function App() {
@@ -31,20 +34,22 @@ function App() {
 
   async function carregarJogadores() {
     try {
-      const res = await fetch(`${API_URL}/jogadores`);
+      const res = await fetch(`${API_URL}/jogadores`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json',
+            'Authorization': `Bearer ${Cookies.get('token_acesso')}`
+            }
+           });
       if (!res.ok) throw new Error('Erro ao buscar jogadores');
       const data: Jogador[] = await res.json();
       setJogadores(data);
+      console.log(jogadores)
     } catch (err) {
       console.error(err);
     }
   }
 
-  useEffect(() => {
-    carregarJogadores();
-  }, []);
-
-  jogadores.sort((a, b) => b.pontos - a.pontos);
+  //jogadores.sort((a, b) => b.pontos - a.pontos);
 
   return (
     <Routes>
