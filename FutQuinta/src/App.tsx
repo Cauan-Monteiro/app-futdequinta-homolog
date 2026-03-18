@@ -7,6 +7,7 @@ import Login from './routes/Login'
 import Home from './routes/Home'
 import Ranking from './routes/Ranking'
 import Sorteio from './routes/Sorteio'
+import Registros from './routes/Registros'
 
 // Importando a Estrutura
 import { RotaProtegida } from './components/RotaProtegida'
@@ -77,6 +78,11 @@ function App() {
         <Route path="/sorteio" element={
           <RotaProtegida>
             <Sorteio jogadores={jogadores} />
+          </RotaProtegida>
+        } />
+        <Route path="/registros" element={
+          <RotaProtegida>
+            <Registros jogadores={jogadores} />
           </RotaProtegida>
         } />
       </Route>

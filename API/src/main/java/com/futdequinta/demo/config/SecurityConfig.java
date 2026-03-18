@@ -9,6 +9,7 @@ import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -45,9 +46,18 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/partidas", "/api/jogadores").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/company").hasRole("JOGADOR")
                         .requestMatchers(HttpMethod.POST, "/api/partidas").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/usuarios").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/usuarios/*/vincular-jogador").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/usuarios/*/alterar-role").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
+    }
+
+    @Bean
+    public Argon2PasswordEncoder passwordEncoder() {
+        // saltLength=16, hashLength=32, parallelism=1, memory=65536 (64MB), iterations=3
+        return new Argon2PasswordEncoder(16, 32, 1, 65536, 3);
     }
 
     @Bean

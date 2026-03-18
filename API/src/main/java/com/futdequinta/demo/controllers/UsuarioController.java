@@ -12,6 +12,7 @@ import com.futdequinta.demo.repositories.UsuarioRepository;
 import com.futdequinta.demo.security.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,6 +25,9 @@ public class UsuarioController {
 
     @Autowired
     TokenService tokenService;
+
+    @Autowired
+    private Argon2PasswordEncoder passwordEncoder;
 
     @Autowired
     private JogadorRepository jogadorRepo;
@@ -61,6 +65,40 @@ public class UsuarioController {
                 .orElseThrow(() -> new RuntimeException("Usuario não encontrado"));
     }
 
+    record VincularJogadorRequest(Long jogadorId) {}
+
+    record AlterarRoleRequest(String role, Long companyId) {}
+
+    @PutMapping("/{id}/vincular-jogador")
+    public ResponseEntity<?> vincularJogador(@PathVariable Long id, @RequestBody VincularJogadorRequest req) {
+        return repo.findById(id)
+                .map(u -> {
+                    if (req.jogadorId() == null) {
+                        u.setIdJogador(null);
+                    } else {
+                        jogadorRepo.findById(req.jogadorId()).ifPresent(u::setIdJogador);
+                    }
+                    return ResponseEntity.ok(repo.save(u));
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/{id}/alterar-role")
+    public ResponseEntity<?> alterarRole(@PathVariable Long id, @RequestBody AlterarRoleRequest req) {
+        RoleUsuario novaRole;
+        try {
+            novaRole = RoleUsuario.valueOf(req.role());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("Role inválida.");
+        }
+        return membershipRepo.findByUsuarioIdAndTimeId(id, req.companyId())
+                .map(m -> {
+                    m.setRole(novaRole);
+                    return ResponseEntity.ok(membershipRepo.save(m));
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Usuario user) {
         Usuario usuarioEncontrado = repo.findByEmail(user.getEmail());
@@ -68,12 +106,28 @@ public class UsuarioController {
         if (usuarioEncontrado == null) {
             return ResponseEntity.status(404).body("Não Encontrado");
         }
-        if (!(usuarioEncontrado.getSenha().equals(user.getSenha()))) {
+
+        String senhaInformada = user.getSenha();
+        String senhaArmazenada = usuarioEncontrado.getSenha();
+        boolean autenticado = false;
+
+        if (senhaArmazenada.startsWith("$argon2")) {
+            // Senha já hasheada — comparação normal
+            autenticado = passwordEncoder.matches(senhaInformada, senhaArmazenada);
+        } else {
+            // Senha ainda em plaintext — migração transparente
+            if (senhaArmazenada.equals(senhaInformada)) {
+                autenticado = true;
+                usuarioEncontrado.setSenha(passwordEncoder.encode(senhaInformada));
+                repo.save(usuarioEncontrado);
+            }
+        }
+
+        if (!autenticado) {
             return ResponseEntity.status(401).body("Login Invalido");
         }
 
         String token = tokenService.gerarToken(usuarioEncontrado);
-
         return ResponseEntity.status(200).body(token);
     }
 
@@ -102,7 +156,7 @@ public class UsuarioController {
         Usuario usuario = new Usuario();
         usuario.setNome(req.nome());
         usuario.setEmail(req.email());
-        usuario.setSenha(req.senha());
+        usuario.setSenha(passwordEncoder.encode(req.senha()));
         usuario.setIdJogador(null);
         Usuario usuarioSalvo = repo.save(usuario);
 

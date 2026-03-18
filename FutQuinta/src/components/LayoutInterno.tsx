@@ -161,6 +161,11 @@ export function LayoutInterno() {
                   <span className="hidden sm:inline">Sorteador Times</span>
                 </NavLink>
               )}
+              {equipeAtiva?.role === 'ADMIN' && (
+                <NavLink to="/registros" className={navLinkClass}>
+                  Registros
+                </NavLink>
+              )}
             </div>
           </div>
         </div>

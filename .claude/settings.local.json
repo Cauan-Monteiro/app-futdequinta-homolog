@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(py .claude/skills/ui-ux-pro-max/scripts/search.py \"admin dashboard mobile table management sports\" --design-system -p \"Registros - FutDeQuinta\")",
+      "Bash(py .claude/skills/ui-ux-pro-max/scripts/search.py \"touch mobile table card list\" --domain ux -n 8)"
     ]
   }
 }

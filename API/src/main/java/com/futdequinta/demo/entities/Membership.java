@@ -1,5 +1,6 @@
 package com.futdequinta.demo.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.futdequinta.demo.enums.RoleUsuario;
 import jakarta.persistence.Entity;
 import jakarta.persistence.*;
@@ -13,6 +14,7 @@ public class Membership {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;
