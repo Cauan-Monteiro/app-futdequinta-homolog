@@ -47,15 +47,17 @@ npm run preview  # Preview production build
 **Multi-team model:** A `Usuario` can belong to multiple `Company` teams via `Membership` entities, each with a `RoleUsuario`. These per-team roles are embedded in the JWT claims (`permissoes`), enabling the frontend to switch active teams without re-authenticating.
 
 **Key entity relationships:**
-- `Usuario` 1-1 `Jogador` (player profile with stats)
+- `Usuario` 1-1 `Jogador` (player profile with stats, linked via `idJogador` foreign key)
 - `Usuario` 1-N `Membership` N-1 `Company` (team roles)
-- `Partida` stores match results; saving a match triggers player stat updates (pontos, vitorias, empates, derrotas)
+- `Partida` stores match results with `JogadorTime` (`@ElementCollection` of `{id, time}` pairs). **Saving a match does NOT auto-update player stats** — stats (`pontos`, `vitorias`, `empates`, `derrotas`, `partidas`) must be updated explicitly via `PUT /api/jogadores/{id}`
 
-**CORS:** Only allows `http://localhost` and `http://129.148.62.223`.
+**Passwords are stored and compared in plaintext** in `UsuarioController`.
+
+**CORS:** Allows `http://localhost`, `http://localhost:5173` (dev), and `http://129.148.62.223`. Note: `SecurityConfig` restricts globally, but controllers also declare `@CrossOrigin` individually.
 
 ### Frontend (React + TypeScript)
 
-**Auth flow:** Login stores JWT in a cookie. `AuthContext` decodes the token on mount to extract `equipeAtiva` (active team) and `permissoesGlobais` (per-team permission map). `RotaProtegida` redirects to `/` if no cookie is present.
+**Auth flow:** Login stores JWT in a cookie. `AuthContext` decodes the token on mount to populate `permissoesGlobais` (a `Record<companyId, role>` map from the JWT `permissoes` claim). `equipeAtiva` is derived by picking the **first key** of that map — there is no explicit active-team selection yet. `RotaProtegida` redirects to `/` if no cookie is present.
 
 **Route structure:**
 - `/` → Login (public)
@@ -63,7 +65,15 @@ npm run preview  # Preview production build
 - `/ranking` → Player leaderboard (sorted by points desc, losses asc, wins desc)
 - `/sorteio` → Random team draw tool
 
-**State:** Auth state lives in `AuthContext`. Player list (`jogadores`) is fetched in `App.tsx` and passed as props. No additional state management library (no Redux/Zustand).
+**State:** Auth state lives in `AuthContext`. Player list (`jogadores`) is held in `App.tsx` state and passed as props to all routes. `carregarJogadores()` is passed down to `Home` and called from there — **players are not loaded on app mount**, so `Ranking` and `Sorteio` show empty lists until `Home` is visited first.
+
+**Sorteio algorithm:** Players must have `posicao` of `"Goleiro"` or `"Linha"` (the `Posicao` enum). Requires ≥2 goalkeepers and ≥8 outfield players. Balance score = `(pontos / (partidas * 3)) * 100`; players sorted descending by score, then distributed snake-draft style (indices 0,3,4,7… → Azul; 1,2,5,6… → Vermelho). Drafts can be saved/loaded via `POST/GET /api/times-sorteados` — one draft per `companyId` (upsert on save). The `TimeSorteado` entity stores player ID lists for each team plus `dataSorteio`.
+
+**Toast notifications:** `useToast` hook (`FutQuinta/src/hooks/useToast.ts`) manages a list of auto-dismissing toasts (4 s). `ToastContainer` renders them. Both are used together — instantiate `useToast` at the component level and pass `toasts`/`removeToast` to `ToastContainer`.
+
+**Player attributes:** `Jogador` has an `@Embedded` `Atributos` object (`attack`, `defense`, `shot`, `pass`, `physical`, `pace`) stored as columns on the same table. These attributes are not yet used in any balancing logic.
+
+No additional state management library (no Redux/Zustand).
 
 **Admin gating:** Certain actions (creating matches) are protected by both Spring Security role checks on the API and a secondary frontend password prompt (`VITE_ADMIN_PASSWORD`).
 

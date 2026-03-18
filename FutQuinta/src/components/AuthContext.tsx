@@ -15,21 +15,36 @@ export const AuthContext = createContext<any>(null);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [equipeAtiva, setEquipeAtiva] = useState<EquipeAtiva | null>(null);
   const [permissoesGlobais, setPermissoesGlobais] = useState<Record<string, string>>({});
+  const [idJogador, setIdJogador] = useState<number | null>(null);
+  const [isGuest, setIsGuest] = useState(false);
+
+  function aplicarToken(token: string) {
+    const tokenData = jwtDecode<{ permissoes: Record<string, string>; idJogador?: number }>(token);
+    const primeiroId = Object.keys(tokenData.permissoes)[0];
+    if (primeiroId) {
+      setEquipeAtiva({ id: primeiroId, role: tokenData.permissoes[primeiroId] });
+      setPermissoesGlobais(tokenData.permissoes);
+    }
+    setIdJogador(tokenData.idJogador ?? null);
+  }
+
+  function login(token: string) {
+    Cookies.set('token_acesso', token);
+    aplicarToken(token);
+  }
+
+  function entrarComoVisitante() {
+    setIsGuest(true);
+    setEquipeAtiva({ id: 'visitante', role: 'VISITANTE' });
+  }
 
   useEffect(() => {
     const token = Cookies.get('token_acesso');
-    if (token) {
-      const tokenData = jwtDecode<{ permissoes: Record<string, string> }>(token);
-      const primeiroId = Object.keys(tokenData.permissoes)[0]; // Pega o primeiro ID do token (pode ser ajustado conforme a estrutura do token)
-      if (primeiroId) {
-        setEquipeAtiva({ id: primeiroId, role: tokenData.permissoes[primeiroId] });
-        setPermissoesGlobais(tokenData.permissoes);
-      }
-    }
+    if (token) aplicarToken(token);
   }, []);
 
   return (
-    <AuthContext.Provider value={{equipeAtiva, setEquipeAtiva, permissoesGlobais}}>
+    <AuthContext.Provider value={{equipeAtiva, setEquipeAtiva, permissoesGlobais, idJogador, login, isGuest, entrarComoVisitante}}>
       {children}
     </AuthContext.Provider>
   );

@@ -24,6 +24,7 @@ public class TokenService {
     public String gerarToken(Usuario usuario) {
         try {
             Algorithm algoritmo = Algorithm.HMAC256(secret);
+            System.out.println(usuario.getMemberships());
 
             Map<String, String> permissoesPorTime = new HashMap<>();
             for (Membership membership : usuario.getMemberships()) {
@@ -34,6 +35,7 @@ public class TokenService {
                     .withIssuer("futdequinta")
                     .withSubject(usuario.getEmail())
                     .withClaim("nome", usuario.getNome())
+                    .withClaim("idJogador", usuario.getIdJogador() != null ? usuario.getIdJogador().getId() : null)
                     .withClaim("permissoes", permissoesPorTime)
                     .withExpiresAt(Instant.now().plus(15, ChronoUnit.DAYS))
                     .sign(algoritmo);

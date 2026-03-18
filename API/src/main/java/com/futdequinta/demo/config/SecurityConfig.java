@@ -38,8 +38,12 @@ public class SecurityConfig {
                 }))
                 .csrf(csrf -> csrf.disable()) // Desativamos o CSRF porque vamos usar Tokens
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/usuarios/login").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/partidas", "/api/jogadores", "/api/company").hasRole("JOGADOR")
+                        .requestMatchers(HttpMethod.GET, "/api/usuarios/verificar-email").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/usuarios/registrar").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/partidas", "/api/jogadores").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/company").hasRole("JOGADOR")
                         .requestMatchers(HttpMethod.POST, "/api/partidas").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)

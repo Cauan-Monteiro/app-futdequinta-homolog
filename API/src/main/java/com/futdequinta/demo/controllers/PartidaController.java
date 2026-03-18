@@ -9,7 +9,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/partidas")
-@CrossOrigin(origins = {"http://localhost", "http://localhost:5173", "http://129.148.62.223"})
 public class PartidaController {
 
     private final PartidaRepository repo;

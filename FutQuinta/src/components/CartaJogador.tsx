@@ -6,12 +6,13 @@ interface Jogador {
     id: number;
     nome: string;
     posicao: "Goleiro" | "Linha";
-    fisico: number;
     pontos: number;
     partidas: number;
     vitorias: number;
     empates: number;
     derrotas: number;
+    fotoUrl: string;
+    atributos: { attack: number; defense: number; shot: number; pass: number; physical: number; pace: number } | null;
 }
 
 interface CartaProps {
@@ -34,15 +35,14 @@ export default function CartaJogador({ jogador, notaGeral }: CartaProps) {
                     {jogador.posicao === "Goleiro" ? "GK" : "ST"}
                 </span>
                 
-                {/* Bandeira (País) */}
-                <div className="w-[30px] h-[20px] bg-cover mt-2" style={{ backgroundImage: "url('https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Flag_of_Brazil.svg/800px-Flag_of_Brazil.svg.png')" }}></div>
-                
-                {/* Escudo (Equipa) */}
-                <div className="w-[33px] h-[45px] bg-cover mt-[10px]" style={{ backgroundImage: "url('https://upload.wikimedia.org/wikipedia/sco/5/56/Real_Madrid_CF.svg')" }}></div>
+                {/* Posição badge */}
+                <span className="text-[0.65rem] font-bold mt-2 text-cyan-300 uppercase tracking-widest">
+                    {jogador.posicao === "Goleiro" ? "Goleiro" : "Linha"}
+                </span>
             </div>
 
             {/* 3. Foto do Jogador (z-20) */}
-            <div className="w-[214px] h-[200px] absolute top-[80px] right-[20px] z-20 bg-contain bg-no-repeat bg-center" style={{ backgroundImage: `url('https://res.cloudinary.com/dk9fhp8d8/image/upload/w_453,h_594,c_fill/iconJogador_g2wkq9.png'})` }}></div>
+            <div className="w-[214px] h-[200px] absolute top-[80px] right-[20px] z-20 bg-contain bg-no-repeat bg-center" style={{ backgroundImage: `url(${jogador.fotoUrl? jogador.fotoUrl : 'https://res.cloudinary.com/dk9fhp8d8/image/upload/w_453,h_594,c_fill/iconJogador_g2wkq9.png'})` }}></div>
 
             {/* 4. Detalhes: Nome e Atributos (z-30) */}
             <div className="flex flex-col gap-4 flex-nowrap justify-center items-center w-[260px] h-[180px] absolute bottom-[60px] left-[50px] z-30">
@@ -59,17 +59,16 @@ export default function CartaJogador({ jogador, notaGeral }: CartaProps) {
                     
                     {/* Coluna 1 */}
                     <div className="w-[45%] h-[80px] -mt-[40px] border-r border-[#24ccff] flex flex-col items-center">
-                        <p className="text-[1.2rem] m-0"><span className="font-bold">99</span> PAC</p>
-                        <p className="text-[1.2rem] m-0"><span className="font-bold">99</span> SHO</p>
-                        <p className="text-[1.2rem] m-0"><span className="font-bold">99</span> PAS</p>
+                        <p className="text-[1.2rem] m-0"><span className="font-bold">{jogador.atributos?.pace ?? 0}</span> PAC</p>
+                        <p className="text-[1.2rem] m-0"><span className="font-bold">{jogador.atributos?.shot ?? 0}</span> SHO</p>
+                        <p className="text-[1.2rem] m-0"><span className="font-bold">{jogador.atributos?.pass ?? 0}</span> PAS</p>
                     </div>
-                    
+
                     {/* Coluna 2 */}
                     <div className="w-[45%] h-[80px] -mt-[40px] flex flex-col items-center">
-                        <p className="text-[1.2rem] m-0"><span className="font-bold">99</span> DRI</p>
-                        <p className="text-[1.2rem] m-0"><span className="font-bold">99</span> DEF</p>
-                        {/* Exemplo de uso de dado real: */}
-                        <p className="text-[1.2rem] m-0"><span className="font-bold">{Math.min((jogador.fisico ?? 0) * 10, 99)}</span> PHY</p>
+                        <p className="text-[1.2rem] m-0"><span className="font-bold">{jogador.atributos?.attack ?? 0}</span> DRI</p>
+                        <p className="text-[1.2rem] m-0"><span className="font-bold">{jogador.atributos?.defense ?? 0}</span> DEF</p>
+                        <p className="text-[1.2rem] m-0"><span className="font-bold">{jogador.atributos?.physical ?? 0}</span> PHY</p>
                     </div>
                 </div>
             </div>

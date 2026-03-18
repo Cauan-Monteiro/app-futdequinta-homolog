@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import Cookies from 'js-cookie'
 
@@ -20,19 +20,28 @@ export interface Jogador {
   id: number
   nome: string
   posicao: "Goleiro" | "Linha"
-  fisico: number
   pontos: number
   partidas: number
   vitorias: number
   empates: number
   derrotas: number
-  fotoUrl: string | null;
+  fotoUrl: string
+  atributos: {
+    attack: number
+    defense: number
+    shot: number
+    pass: number
+    physical: number
+    pace: number
+  } | null
 }
 
 function App() {
   const [jogadores, setJogadores] = useState<Jogador[]>([])
+  const [carregandoJogadores, setCarregandoJogadores] = useState(false)
 
   async function carregarJogadores() {
+    setCarregandoJogadores(true)
     try {
       const res = await fetch(`${API_URL}/jogadores`, {
           method: 'GET',
@@ -43,28 +52,33 @@ function App() {
       if (!res.ok) throw new Error('Erro ao buscar jogadores');
       const data: Jogador[] = await res.json();
       setJogadores(data);
-      console.log(jogadores)
     } catch (err) {
       console.error(err);
+    } finally {
+      setCarregandoJogadores(false)
     }
   }
 
-  //jogadores.sort((a, b) => b.pontos - a.pontos);
+  useEffect(() => {
+    carregarJogadores();
+  }, []);
 
   return (
     <Routes>
       <Route path="/" element={<Login />} />
 
       <Route element={
-        <RotaProtegida>
+        <RotaProtegida allowGuest>
           <LayoutInterno />
-          </RotaProtegida>
-        }>
-        
+        </RotaProtegida>
+      }>
         <Route path="/home" element={<Home jogadores={jogadores} carregarJogadores={carregarJogadores} />} />
-        <Route path="/ranking" element={<Ranking jogadores={jogadores} />} />
-        <Route path="/sorteio" element={<Sorteio jogadores={jogadores} />} />
-        
+        <Route path="/ranking" element={<Ranking jogadores={jogadores} carregando={carregandoJogadores} />} />
+        <Route path="/sorteio" element={
+          <RotaProtegida>
+            <Sorteio jogadores={jogadores} />
+          </RotaProtegida>
+        } />
       </Route>
     </Routes>
   )

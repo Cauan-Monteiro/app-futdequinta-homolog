@@ -3,7 +3,6 @@ package com.futdequinta.demo.controllers;
 import java.util.List;
 
 import org.springframework.data.domain.Sort;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -16,7 +15,6 @@ import com.futdequinta.demo.repositories.JogadorRepository;
 
 @RestController
 @RequestMapping("/api/jogadores")
-@CrossOrigin(origins = {"http://localhost", "http://localhost:5173", "http://129.148.62.223"})
 
 public class JogadorController {
 
@@ -38,7 +36,7 @@ public class JogadorController {
                     j.setNome(atualizado.getNome());
                     j.setPontos(atualizado.getPontos());
                     j.setPosicao(atualizado.getPosicao());
-                    j.setFisico(atualizado.getFisico());
+                    j.setAtributos(atualizado.getAtributos());
                     j.setPartidas(atualizado.getPartidas());
                     j.setVitorias(atualizado.getVitorias());
                     j.setEmpates(atualizado.getEmpates());
