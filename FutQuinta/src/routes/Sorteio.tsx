@@ -1,4 +1,5 @@
-import { useState, useContext } from 'react';
+import { useState, useContext, useRef } from 'react';
+import { toPng } from 'html-to-image';
 import { useOutletContext } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import { AuthContext } from '../components/AuthContext';
@@ -36,6 +37,7 @@ export default function Sorteio({ jogadores }: SorteioProps) {
     const { addToast } = useOutletContext<OutletToastCtx>();
     const { equipeAtiva } = useContext(AuthContext);
     const [salvando, setSalvando] = useState(false);
+    const sorteadosRef = useRef<HTMLDivElement>(null);
 
     const [sortJogadores, setSortJogadores] = useState<Jogador[]>([]);
     const [sortGoleiros, setSortGoleiros] = useState<Jogador[]>([]);
@@ -113,6 +115,27 @@ export default function Sorteio({ jogadores }: SorteioProps) {
         }
     };
 
+    const compartilharFoto = async () => {
+        if (!sorteadosRef.current) return;
+        try {
+            const dataUrl = await toPng(sorteadosRef.current, { cacheBust: true });
+
+            const blob = await (await fetch(dataUrl)).blob();
+            const file = new File([blob], 'times-sorteados.png', { type: 'image/png' });
+            if (navigator.canShare?.({ files: [file] })) {
+                await navigator.share({ files: [file], title: 'Times Sorteados' });
+                return;
+            }
+
+            const link = document.createElement('a');
+            link.download = 'times-sorteados.png';
+            link.href = dataUrl;
+            link.click();
+        } catch {
+            addToast('Erro ao gerar a imagem.', 'error');
+        }
+    };
+
     const notaGeral = (f: number, s: number) => {
         return (s * 0.8) + ((f * 10) * 0.2);
     }
@@ -123,10 +146,6 @@ export default function Sorteio({ jogadores }: SorteioProps) {
         setTrocasRealizadas(null);
         setCountTrocas(0);
 
-        // if (sortGoleiros.length < 2) {
-        //     setErroSorteio("Selecione pelo menos 2 goleiros para realizar o sorteio.");
-        //     return;
-        // }
         if (sortJogadores.length < 8) {
             setErroSorteio("Selecione pelo menos 8 jogadores de linha para realizar o sorteio.");
             return;
@@ -141,18 +160,45 @@ export default function Sorteio({ jogadores }: SorteioProps) {
             return parseFloat(scoreJogador(b)) - parseFloat(scoreJogador(a));
         });
 
-        const timeAzulGoleiro = goleirosOrdenados[1];
-        const timeVermelhoGoleiro = goleirosOrdenados[0];
+        let novoAzul: Jogador[];
+        let novoVermelho: Jogador[];
 
-        const novoAzul: Jogador[] = timeAzulGoleiro ? [timeAzulGoleiro] : [];
-        const novoVermelho: Jogador[] = timeVermelhoGoleiro ? [timeVermelhoGoleiro] : [];
-        jogadoresOrdenados.forEach((jogador, index) => {
-            if (index % 4 === 0 || index % 4 === 3) {
-                novoAzul.push(jogador);
-            } else {
-                novoVermelho.push(jogador);
-            }
-        });
+        if (sortGoleiros.length === 1) {
+            // Vermelho recebe o único GK mas fica com menos 1 jogador de linha como compensação
+            novoVermelho = [goleirosOrdenados[0]];
+            novoAzul = [];
+
+            const N = jogadoresOrdenados.length;
+            const vermelhoTarget = Math.ceil(N / 2) - 1;
+            let vermelhoCount = 0;
+
+            jogadoresOrdenados.forEach((jogador, index) => {
+                const posInGroup = index % 4;
+                const wouldGoVermelho = posInGroup === 1 || posInGroup === 2;
+                if (wouldGoVermelho && vermelhoCount < vermelhoTarget) {
+                    novoVermelho.push(jogador);
+                    vermelhoCount++;
+                } else {
+                    novoAzul.push(jogador);
+                }
+            });
+        } else {
+            // Caso 0 GK ou 2+ GKs: snake-draft padrão
+            const timeAzulGoleiro = goleirosOrdenados[1];
+            const timeVermelhoGoleiro = goleirosOrdenados[0];
+
+            novoAzul = timeAzulGoleiro ? [timeAzulGoleiro] : [];
+            novoVermelho = timeVermelhoGoleiro ? [timeVermelhoGoleiro] : [];
+
+            jogadoresOrdenados.forEach((jogador, index) => {
+                if (index % 4 === 0 || index % 4 === 3) {
+                    novoAzul.push(jogador);
+                } else {
+                    novoVermelho.push(jogador);
+                }
+            });
+        }
+
         setTimeAzul(novoAzul);
         setTimeVermelho(novoVermelho);
     }
@@ -278,6 +324,7 @@ export default function Sorteio({ jogadores }: SorteioProps) {
                 <div className="mt-8 animate-fadeIn">
                     <h3 className="text-2xl font-bold text-white mb-6 text-center">🏆 Times Sorteados</h3>
 
+                    <div ref={sorteadosRef} className="bg-gray-900 p-4 rounded-xl">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                         {/* CARD DO TIME AZUL */}
                         <div className="bg-gray-800 border-t-4 border-blue-500 rounded-xl p-6 shadow-xl">
@@ -367,11 +414,18 @@ export default function Sorteio({ jogadores }: SorteioProps) {
                             </p>
                         )}
                     </div>
+                    </div>
 
                     <div className="flex flex-col sm:flex-row justify-center gap-4 mt-4">
                         <button onClick={salvarTimeSorteado} disabled={salvando}
                             className="bg-cyan-600 hover:bg-cyan-700 disabled:bg-gray-600 text-white font-bold py-3 px-8 rounded shadow-lg transition-colors cursor-pointer">
                             {salvando ? 'Salvando...' : 'Salvar Time'}
+                        </button>
+                        <button
+                            onClick={compartilharFoto}
+                            className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded shadow-lg transition-colors cursor-pointer"
+                        >
+                            Compartilhar Foto
                         </button>
                         <button
                             onClick={() => {
