@@ -38,6 +38,8 @@ export default function Sorteio({ jogadores }: SorteioProps) {
     const { equipeAtiva } = useContext(AuthContext);
     const [salvando, setSalvando] = useState(false);
     const sorteadosRef = useRef<HTMLDivElement>(null);
+    const gridRef = useRef<HTMLDivElement>(null);
+    const trocasListRef = useRef<HTMLDivElement>(null);
 
     const [sortJogadores, setSortJogadores] = useState<Jogador[]>([]);
     const [sortGoleiros, setSortGoleiros] = useState<Jogador[]>([]);
@@ -117,8 +119,27 @@ export default function Sorteio({ jogadores }: SorteioProps) {
 
     const compartilharFoto = async () => {
         if (!sorteadosRef.current) return;
+        const container = sorteadosRef.current;
+        const grid = gridRef.current;
+        const trocasList = trocasListRef.current;
         try {
-            const dataUrl = await toPng(sorteadosRef.current, { cacheBust: true });
+            container.style.width = '1024px';
+            if (grid) grid.style.gridTemplateColumns = 'repeat(2, 1fr)';
+            if (trocasList) {
+                trocasList.style.display = 'grid';
+                trocasList.style.gridTemplateColumns = 'repeat(2, 1fr)';
+            }
+
+            container.getBoundingClientRect();
+
+            const dataUrl = await toPng(container, { cacheBust: true });
+
+            container.style.width = '';
+            if (grid) grid.style.gridTemplateColumns = '';
+            if (trocasList) {
+                trocasList.style.display = '';
+                trocasList.style.gridTemplateColumns = '';
+            }
 
             const blob = await (await fetch(dataUrl)).blob();
             const file = new File([blob], 'times-sorteados.png', { type: 'image/png' });
@@ -132,6 +153,12 @@ export default function Sorteio({ jogadores }: SorteioProps) {
             link.href = dataUrl;
             link.click();
         } catch {
+            container.style.width = '';
+            if (grid) grid.style.gridTemplateColumns = '';
+            if (trocasList) {
+                trocasList.style.display = '';
+                trocasList.style.gridTemplateColumns = '';
+            }
             addToast('Erro ao gerar a imagem.', 'error');
         }
     };
@@ -307,7 +334,7 @@ export default function Sorteio({ jogadores }: SorteioProps) {
             </div>
 
             {timeAzul.length === 0 && (
-                <div className="flex flex-col items-center gap-3 mt-6">
+            <div className="flex flex-col items-center gap-3 mt-6">
                     {erroSorteio && (
                         <p className="text-red-400 text-sm text-center">{erroSorteio}</p>
                     )}
@@ -325,7 +352,7 @@ export default function Sorteio({ jogadores }: SorteioProps) {
                     <h3 className="text-2xl font-bold text-white mb-6 text-center">🏆 Times Sorteados</h3>
 
                     <div ref={sorteadosRef} className="bg-gray-900 p-4 rounded-xl">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                         {/* CARD DO TIME AZUL */}
                         <div className="bg-gray-800 border-t-4 border-blue-500 rounded-xl p-6 shadow-xl">
                             <h4 className="text-xl font-bold text-blue-400 mb-4 text-center">Time Azul</h4>
@@ -398,7 +425,7 @@ export default function Sorteio({ jogadores }: SorteioProps) {
                                 {countTrocas >= 2 ? 'Limite de trocas atingido.' : 'Nenhuma troca realizada ainda. Clique em um jogador para trocar.'}
                             </p>
                         ) : (
-                            <div className="flex flex-col gap-2">
+                            <div ref={trocasListRef} className="flex flex-col gap-2">
                                 {trocasRealizadas.map((t, i) => (
                                     <div key={i} className="flex items-center gap-3 bg-gray-700 rounded-lg px-4 py-2.5">
                                         <span className="w-5 h-5 rounded-full bg-cyan-700 text-cyan-100 text-xs font-bold flex items-center justify-center shrink-0">{i + 1}</span>

@@ -11,13 +11,21 @@ interface Jogador {
   id: number;
   nome: string;
   posicao: "Goleiro" | "Linha";
+  fisico: number
   pontos: number;
   partidas: number;
   vitorias: number;
   empates: number;
   derrotas: number;
-  fotoUrl: string;
-  atributos: { attack: number; defense: number; shot: number; pass: number; physical: number; pace: number } | null;
+  fotoUrl: string | null;
+  atributos: {
+      attack: number | null;
+      defense: number | null;
+      shot: number | null;
+      pass: number | null;
+      physical: number;
+      pace: number | null
+  };
 }
 
 interface PartidaSalva {
